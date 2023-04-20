@@ -3,9 +3,10 @@
 require('dotenv').config();
 const io = require('socket.io-client');
 const PORT = process.env.PORT || 3001;
-const SERVER_URL = `${process.env.SERVER_URL}:${PORT}/hide`;
+const SERVER_URL = `http://localhost:3001/hide`;
 
 const playerSocket = io(SERVER_URL);
+console.log(SERVER_URL);
 /*
 payload = {
   name:
@@ -18,7 +19,15 @@ payload = {
 
 playerSocket.on('start', (hidingSpots) => {
   //generate a payload
+  let payload = {
+    name: 'Laurel',
+    role: 'hider',
+    currentSpot: null,
+    movingTo: 8,
+    otherSpots: hidingSpots,
+  }
   //run hide with payload
+  playerSocket.emit('move', payload);
   //set delay for hiders to hide.
 });
 
@@ -27,11 +36,12 @@ playerSocket.on('traveling', (payload) => {
   //emit arrived
 });
 
-playerSocket.on('noise', (message) => {
+playerSocket.on('playerMovement', (message) => {
+  console.log("You hear the bushes rustle as someone is moving...");
   //log message that someone is moving
 });
 
-playerSocket,on('arrived', (payload) => {
+playerSocket.on('arrived', (payload) => {
   //log current location
   //log all available hidingSpots player can move to.
   //run hide function.
@@ -46,7 +56,9 @@ playerSocket.on('end', (message) => {
   //log that game is over and winner from message.
 });
 
-function hide() {
+playerSocket.emit('start', {});
+
+function hide(payload) {
   //set REPL listener for input
   //check if input matches command
     //emit move

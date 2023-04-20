@@ -4,10 +4,12 @@ require('dotenv').config();
 const { Server } = require('socket.io');
 const MessageQueue = require('./lib/queue');
 const PORT = process.env.PORT || 3001;
-const io = Server(PORT);
+const io = new Server(PORT);
+const util = require('util');
 
 const hidingSpots = new MessageQueue();
-const movingTo = new MessageQueue();
+const inTransit = new MessageQueue();
+const caught = new MessageQueue();
 const hide = io.of('/hide');
 
 /* movingTo = {
@@ -36,22 +38,43 @@ const hide = io.of('/hide');
 }
 */
 
+for(let i=1; i<=10; i++){
+  let room = new MessageQueue()
+  let room2 = new MessageQueue()
+  hidingSpots.store(i, room);
+  inTransit.store(i, room2);
+}
+// console.log(util.inspect(hidingSpots, false, null));
+
 //setup hidingSpots/movingTo queue by numRooms.
 
 hide.on('connection', (socket) => {
+  console.log(socket.id);
   socket.on('start', (payload) => {
+    // console.log("Hello world!")
+    let rooms = Object.keys(hidingSpots.data);
+    // console.log(rooms);
     //set startTime to Date.now();
     //emit start with all hidingSpots.
+    hide.emit('start', rooms);
   });
 
   socket.on('move', (payload) => {
     //add payload to movingTo queue
-    //broadcast 'noise' to all other sockets.
+    let room = inTransit.read(payload.movingTo);
+    room.store(payload.role, payload);
+    //broadcast 'playerMovements' to all other sockets.
+    socket.broadcast.emit('playerMovement', payload)
     //if role === Hider
-      //if movingTo has Seeker
-        //emit 'caught'
-      //else
-        //emit 'traveling'
+    if (payload.role === 'hider') {
+      let route = inTransit.read(payload.movingTo);
+      let seeker = route['seeker'];
+      if (seeker) {
+        socket.emit('caught', payload);
+      } else {
+        socket.emit('traveling', payload);
+      }
+    }
   });
 
   socket.on('arrived', (payload) => {
