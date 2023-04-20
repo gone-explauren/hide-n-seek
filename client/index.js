@@ -6,6 +6,15 @@ const PORT = process.env.PORT || 3001;
 const SERVER_URL = `${process.env.SERVER_URL}:${PORT}/hide`;
 
 const playerSocket = io(SERVER_URL);
+/*
+payload = {
+  name:
+  role:
+  currentSpot:
+  movingTo:
+  otherSpots:
+}
+*/
 
 playerSocket.on('start', (hidingSpots) => {
   //generate a payload

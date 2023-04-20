@@ -10,18 +10,6 @@ const hidingSpots = new MessageQueue();
 const movingTo = new MessageQueue();
 const hide = io.of('/hide');
 
-const numRooms = 0;
-
-/*
-payload = {
-  name:
-  role:
-  currentSpot:
-  movingTo:
-  otherSpots:
-}
-*/
-
 /* movingTo = {
   {
     1: {
