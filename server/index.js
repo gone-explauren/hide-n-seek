@@ -12,6 +12,8 @@ const inTransit = new MessageQueue();
 const caught = new MessageQueue();
 const hide = io.of('/hide');
 
+let hider = null;
+
 /* movingTo = {
   {
     1: {
@@ -49,17 +51,23 @@ for (let i = 1; i <= 10; i++) {
 //setup hidingSpots/movingTo queue by numRooms.
 
 hide.on('connection', (socket) => {
-  console.log(socket.id);
+  console.log(`Player ${socket.id} has connected.`);
   socket.on('start', (payload) => {
     // console.log("Hello world!")
     let rooms = Object.keys(hidingSpots.data);
     // console.log(rooms);
     //set startTime to Date.now();
     //emit start with all hidingSpots.
-    hide.emit('start', rooms);
+    socket.emit('start', rooms);
   });
 
   socket.on('move', (payload) => {
+    if (!hider) {
+      hider = payload;
+    } else {
+      payload.role = 'seeker';
+      hider = null;
+    }
     //add payload to movingTo queue
     let room = inTransit.read(payload.movingTo);
     room.store(`${payload.role} ${socket.id}`, payload);
@@ -68,12 +76,17 @@ hide.on('connection', (socket) => {
     //if role === Hider
     if (payload.role === 'hider') {
       let route = inTransit.read(payload.movingTo);
-      let seeker = route['seeker'];
-      if (seeker) {
-        socket.emit('caught', payload);
-      } else {
-        socket.emit('traveling', payload);
-      }
+      let players = Object.keys(route.data);
+      players.forEach(player => {
+        let role = player.split(' ')[0];
+        if (role === 'seeker') {
+          socket.emit('caught', payload);
+        } else {
+          socket.emit('traveling', payload);
+        }
+      });
+    } else {
+      socket.emit('traveling', payload);
     }
   });
 
@@ -104,17 +117,10 @@ hide.on('connection', (socket) => {
     hidingSpots.store(payload.currentSpot, room);
 
     let rooms = Object.keys(hidingSpots.data);
-    console.log('index of ', rooms.indexOf(payload.currentSpot));
+    //console.log('index of ', rooms.indexOf(payload.currentSpot));
     payload.otherSpots.splice(rooms.indexOf(payload.currentSpot), 1);
-    console.log('ALL THE OTHER ROOMS ', payload.otherSpots);
+    // console.log('ALL THE OTHER ROOMS ', payload.otherSpots);
     socket.emit('arrived', payload);
-    // if (payload.role === 'seeker') {
-    //   if (seeker) {
-    //     socket.emit('caught', payload);
-    //   } else {
-    //     socket.emit('traveling', payload);
-    //   }
-    // }
 
     //move payload from movingTo queue to hidingSpot queue.
     //if role === Seeker

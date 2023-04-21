@@ -6,7 +6,6 @@ const PORT = process.env.PORT || 3001;
 const SERVER_URL = `http://localhost:3001/hide`;
 
 const playerSocket = io(SERVER_URL);
-console.log(SERVER_URL);
 /*
 payload = {
   name:
@@ -19,8 +18,10 @@ payload = {
 
 playerSocket.on('start', (hidingSpots) => {
   //generate a payload
+  let names = ['Laurel', 'Jon', 'Daniel'];
+  let random2 = Math.floor(Math.random() * (names.length - 1));
   let payload = {
-    name: 'Laurel',
+    name: names[random2],
     role: 'hider',
     currentSpot: null,
     movingTo: "8",
@@ -32,11 +33,10 @@ playerSocket.on('start', (hidingSpots) => {
 });
 
 playerSocket.on('traveling', (payload) => {
+  console.log('You are moving.')
   setTimeout(() => {
-    console.log('You are moving.')
-  }, 2000)
-
-  playerSocket.emit('arrived', payload);
+    playerSocket.emit('arrived', payload);
+  }, 2000);
   //set delay
   //emit arrived
 });
@@ -47,15 +47,23 @@ playerSocket.on('playerMovement', (message) => {
 });
 
 playerSocket.on('arrived', (payload) => {
-  console.log("You've arrived in room ", payload.currentSpot)
-
+  if (payload.role === 'seeker') {
+    console.log(`You are plotting your next move in room ${payload.currentSpot}.`)
+  } else {
+    console.log(`You are now hiding in room ${payload.currentSpot}.`)
+  }
+  let otherSpots = payload.otherSpots;
+  /*console.log('Here are the available spots: ');
+  otherSpots.forEach(spot => {
+    console.log('Room ', spot);
+  });*/
   //log current location
   //log all available hidingSpots player can move to.
   //run hide function.
 });
 
 playerSocket.on('caught', (payload) => {
-  console.log('caught!!!');
+  console.log('You were caught by the seeker!');
   
   //log that player was caught
   //emit 'caught'
