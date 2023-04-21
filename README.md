@@ -10,6 +10,10 @@
 
 This is a Socket.io powered client and server application that allows users to play a game of hide-n-seek. 
 
+## Whiteboard
+
+![image](./Whiteboard.png)
+
 ## Functionality
 
 * The game is played in a "stage" with 10 hiding spots.
