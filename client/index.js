@@ -23,7 +23,7 @@ playerSocket.on('start', (hidingSpots) => {
     name: 'Laurel',
     role: 'hider',
     currentSpot: null,
-    movingTo: 8,
+    movingTo: "8",
     otherSpots: hidingSpots,
   }
   //run hide with payload
@@ -32,6 +32,11 @@ playerSocket.on('start', (hidingSpots) => {
 });
 
 playerSocket.on('traveling', (payload) => {
+  setTimeout(() => {
+    console.log('You are moving.')
+  }, 2000)
+
+  playerSocket.emit('arrived', payload);
   //set delay
   //emit arrived
 });
@@ -42,12 +47,16 @@ playerSocket.on('playerMovement', (message) => {
 });
 
 playerSocket.on('arrived', (payload) => {
+  console.log("You've arrived in room ", payload.currentSpot)
+
   //log current location
   //log all available hidingSpots player can move to.
   //run hide function.
 });
 
 playerSocket.on('caught', (payload) => {
+  console.log('caught!!!');
+  
   //log that player was caught
   //emit 'caught'
 });
@@ -61,11 +70,11 @@ playerSocket.emit('start', {});
 function hide(payload) {
   //set REPL listener for input
   //check if input matches command
-    //emit move
+  //emit move
 }
 
 function start() {
   //set REPL listener for input
   //check if input matches start
-    //emit start.
+  //emit start.
 }
