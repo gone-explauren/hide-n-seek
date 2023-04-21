@@ -1,5 +1,11 @@
 # hide-n-seek
 
+## Contributors
+
+* Laurel Perkins
+* Jonathan Tsai
+* Daniel Yoon
+
 ## Description
 
 This is a Socket.io powered client and server application that allows users to play a game of hide-n-seek. 
